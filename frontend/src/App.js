@@ -211,6 +211,25 @@ const LoginForm = () => {
 };
 
 const VehicleCard = ({ vehicle, onBook, isAdmin, onDelete }) => {
+  const getCapacityText = (capacity, type) => {
+    if (type === 'motorcycle') {
+      return capacity === 1 ? '1 rider' : `${capacity} riders`;
+    } else if (type === 'truck') {
+      return capacity <= 3 ? `${capacity} seats` : `${capacity} seats (crew cab)`;
+    } else {
+      return `${capacity} seats`;
+    }
+  };
+
+  const getCapacityIcon = (type) => {
+    switch(type) {
+      case 'motorcycle': return '🏍️';
+      case 'truck': return '🚛';
+      case 'van': return '🚐';
+      default: return '👥';
+    }
+  };
+
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden">
       <div className="h-48 bg-gray-200 flex items-center justify-center">
@@ -237,6 +256,13 @@ const VehicleCard = ({ vehicle, onBook, isAdmin, onDelete }) => {
         </div>
         
         <p className="text-gray-600 mb-2">{vehicle.brand} {vehicle.model} ({vehicle.year})</p>
+        
+        {/* Capacity Information */}
+        <div className="flex items-center mb-3 text-sm text-gray-700 bg-gray-50 px-3 py-2 rounded">
+          <span className="mr-2">{getCapacityIcon(vehicle.type)}</span>
+          <span className="font-medium">{getCapacityText(vehicle.capacity, vehicle.type)}</span>
+        </div>
+        
         <p className="text-gray-700 mb-4">{vehicle.description}</p>
         
         <div className="flex justify-between items-center">
