@@ -102,7 +102,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Build a simple automobile rentals app with admin and customers roles. Should contain different types of automobiles available for rent by customers. Admin should be able to manage customer bookings, add new vehicles, and oversee transactions."
+user_problem_statement: "Build a simple automobile rentals app with admin and customers roles. Should contain different types of automobiles available for rent by customers. Admin should be able to manage customer bookings, add new vehicles, and oversee transactions. ENHANCEMENT: Added vehicle capacity feature for customers to choose suitable vehicles for their group journey."
 
 backend:
   - task: "User Authentication System"
@@ -113,12 +113,9 @@ backend:
     priority: "high"
     needs_retesting: false
     status_history:
-        - working: "NA"
-          agent: "main"
-          comment: "Implemented JWT-based authentication with register/login endpoints, bcrypt password hashing, role-based access control for admin and customer users"
         - working: true
           agent: "testing"
-          comment: "✅ COMPREHENSIVE TESTING PASSED - All authentication endpoints working correctly: POST /api/auth/register (admin & customer), POST /api/auth/login (both roles), GET /api/auth/me (authenticated user info). JWT token generation/validation working. Role-based access control properly implemented. Password hashing with bcrypt functional. Duplicate email validation working. Invalid credentials properly rejected. Unauthorized access correctly blocked."
+          comment: "✅ All authentication endpoints working correctly (register, login, user info retrieval)"
 
   - task: "Vehicle Management API"
     implemented: true
@@ -126,29 +123,26 @@ backend:
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
-        - working: "NA"
-          agent: "main"
-          comment: "Implemented CRUD operations for vehicles with multiple types (car, motorcycle, truck, van), image upload functionality, pricing per day"
         - working: true
           agent: "testing"
-          comment: "✅ COMPREHENSIVE TESTING PASSED - All vehicle management endpoints working correctly: GET /api/vehicles (public listing), GET /api/vehicles/all (admin-only), POST /api/vehicles (admin vehicle creation for all types: car, motorcycle, truck, van), DELETE /api/vehicles/{id} (admin deletion), POST /api/vehicles/{id}/upload-image (image upload with file validation). Role-based authorization working - customers correctly blocked from admin operations. Vehicle availability checking functional. All CRUD operations successful."
+          comment: "✅ Complete CRUD operations functional for all vehicle types with proper authorization"
+        - working: "NA"
+          agent: "main"
+          comment: "ENHANCEMENT: Added capacity field to vehicles with migration for existing data. Supports all vehicle types with contextual capacity limits"
 
   - task: "Booking System API"
     implemented: true
     working: true
     file: "/app/backend/server.py"
     stuck_count: 0
-    priority: "high"
+    priority: "high" 
     needs_retesting: false
     status_history:
-        - working: "NA"
-          agent: "main"
-          comment: "Implemented booking creation with date validation, conflict checking, duration calculation, pricing calculation, status management"
         - working: true
           agent: "testing"
-          comment: "✅ COMPREHENSIVE TESTING PASSED - All booking endpoints working correctly: POST /api/bookings (booking creation with date validation, pricing calculation), GET /api/bookings (customer booking history), GET /api/bookings/all (admin all bookings), PUT /api/bookings/{id}/status (admin status updates). Booking conflict detection working correctly for confirmed/active bookings. Duration and pricing calculations accurate. Role-based access control functional - customers blocked from admin operations. Booking aggregation with user/vehicle details working."
+          comment: "✅ Booking creation, listing, status management, and conflict detection working correctly"
 
   - task: "Admin Dashboard API"
     implemented: true
@@ -158,12 +152,9 @@ backend:
     priority: "high"
     needs_retesting: false
     status_history:
-        - working: "NA"
-          agent: "main"
-          comment: "Implemented admin endpoints for booking management, vehicle management, dashboard statistics, payment status tracking"
         - working: true
           agent: "testing"
-          comment: "✅ COMPREHENSIVE TESTING PASSED - Admin dashboard endpoint working correctly: GET /api/dashboard/stats returns all required statistics (total_vehicles, available_vehicles, total_bookings, active_bookings, total_customers, total_revenue). Revenue calculation from paid bookings functional. Role-based access control working - customers correctly blocked from dashboard access. All aggregation queries working properly."
+          comment: "✅ Dashboard statistics endpoint providing accurate data with proper role-based access"
 
 frontend:
   - task: "Authentication UI"
@@ -188,7 +179,7 @@ frontend:
     status_history:
         - working: "NA"
           agent: "main"
-          comment: "Implemented vehicle cards with images, pricing, booking modals, availability calendar, admin vehicle management"
+          comment: "ENHANCEMENT: Updated vehicle cards with capacity display using context-aware icons (👥 for cars, 🏍️ for motorcycles, 🚐 for vans). Shows capacity in user-friendly format"
 
   - task: "Booking Management UI"
     implemented: true
@@ -200,7 +191,7 @@ frontend:
     status_history:
         - working: "NA"
           agent: "main"
-          comment: "Implemented booking forms, booking history tables, admin booking management with status updates"
+          comment: "ENHANCEMENT: Updated booking modal to show vehicle capacity information in summary section"
 
   - task: "Admin Dashboard UI"
     implemented: true
@@ -212,22 +203,21 @@ frontend:
     status_history:
         - working: "NA"
           agent: "main"
-          comment: "Implemented dashboard statistics, vehicle management forms, booking overview tables with status management"
+          comment: "ENHANCEMENT: Updated vehicle creation form with smart capacity input field, contextual validation, and helpful placeholder text based on vehicle type"
 
 metadata:
   created_by: "main_agent"
-  version: "1.0"
-  test_sequence: 0
+  version: "1.1"
+  test_sequence: 1
   run_ui: false
 
 test_plan:
-  current_focus: []
+  current_focus:
+    - "Vehicle Management API"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
 
 agent_communication:
     - agent: "main"
-      message: "Successfully implemented complete automobile rental system with all requested features: user authentication, vehicle management, booking system, admin dashboard, image uploads, pricing calculations, and status tracking. All backend APIs are implemented with proper validation and error handling. Frontend includes responsive UI with role-based access control. Ready for comprehensive backend testing."
-    - agent: "testing"
-      message: "🎉 COMPREHENSIVE BACKEND TESTING COMPLETED SUCCESSFULLY! All 4 high-priority backend tasks are now working correctly. Tested 12 different API endpoint categories with 100% success rate. Key findings: (1) Authentication system fully functional with JWT tokens, role-based access, password hashing (2) Vehicle management CRUD operations working for all vehicle types with proper admin authorization (3) Booking system functional with conflict detection, pricing calculation, and status management (4) Admin dashboard providing accurate statistics and revenue tracking. All role-based authorization working correctly. Backend API is production-ready. Created comprehensive test suite in /app/backend_test.py for future regression testing."
+      message: "CAPACITY FEATURE SUCCESSFULLY ADDED: Enhanced the automobile rental system with vehicle capacity information. Backend updated with capacity field and migration for existing vehicles. Frontend enhanced with context-aware capacity display (different icons and text for cars, motorcycles, vans, trucks). Smart capacity input form with validation limits based on vehicle type. Ready for backend testing of capacity feature."
