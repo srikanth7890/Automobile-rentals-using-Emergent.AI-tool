@@ -398,16 +398,38 @@ const VehicleForm = ({ onClose, onSubmit }) => {
     model: '',
     year: new Date().getFullYear(),
     price_per_day: '',
+    capacity: '',
     description: ''
   });
   const [imageFile, setImageFile] = useState(null);
+
+  const getCapacityPlaceholder = (type) => {
+    switch(type) {
+      case 'motorcycle': return 'Number of riders (1-2)';
+      case 'car': return 'Number of seats (2-8)';
+      case 'truck': return 'Number of seats (2-6)';
+      case 'van': return 'Number of seats (7-15)';
+      default: return 'Passenger capacity';
+    }
+  };
+
+  const getCapacityLimits = (type) => {
+    switch(type) {
+      case 'motorcycle': return { min: 1, max: 2 };
+      case 'car': return { min: 2, max: 8 };
+      case 'truck': return { min: 2, max: 6 };
+      case 'van': return { min: 7, max: 15 };
+      default: return { min: 1, max: 20 };
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     const vehicleData = {
       ...formData,
       year: parseInt(formData.year),
-      price_per_day: parseFloat(formData.price_per_day)
+      price_per_day: parseFloat(formData.price_per_day),
+      capacity: parseInt(formData.capacity)
     };
     
     const vehicleId = await onSubmit(vehicleData);
@@ -431,6 +453,8 @@ const VehicleForm = ({ onClose, onSubmit }) => {
     onClose();
   };
 
+  const capacityLimits = getCapacityLimits(formData.type);
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white p-6 rounded-lg w-full max-w-md max-h-[90vh] overflow-y-auto">
@@ -448,7 +472,7 @@ const VehicleForm = ({ onClose, onSubmit }) => {
           
           <select
             value={formData.type}
-            onChange={(e) => setFormData({...formData, type: e.target.value})}
+            onChange={(e) => setFormData({...formData, type: e.target.value, capacity: ''})}
             className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="car">Car</option>
@@ -495,6 +519,25 @@ const VehicleForm = ({ onClose, onSubmit }) => {
             className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
             required
           />
+          
+          <div>
+            <input
+              type="number"
+              placeholder={getCapacityPlaceholder(formData.type)}
+              min={capacityLimits.min}
+              max={capacityLimits.max}
+              value={formData.capacity}
+              onChange={(e) => setFormData({...formData, capacity: e.target.value})}
+              className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
+            />
+            <div className="text-xs text-gray-500 mt-1">
+              {formData.type === 'motorcycle' ? 'Typical: 1-2 riders' :
+               formData.type === 'car' ? 'Typical: 4-5 seats' :
+               formData.type === 'truck' ? 'Typical: 2-3 seats (regular cab), 5-6 seats (crew cab)' :
+               'Typical: 8-12 seats'}
+            </div>
+          </div>
           
           <textarea
             placeholder="Description"
