@@ -319,12 +319,36 @@ const BookingModal = ({ vehicle, onClose, onConfirm }) => {
     });
   };
 
+  const getCapacityText = (capacity, type) => {
+    if (type === 'motorcycle') {
+      return capacity === 1 ? '1 rider' : `${capacity} riders`;
+    } else if (type === 'truck') {
+      return capacity <= 3 ? `${capacity} seats` : `${capacity} seats (crew cab)`;
+    } else {
+      return `${capacity} seats`;
+    }
+  };
+
   const today = new Date().toISOString().split('T')[0];
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white p-6 rounded-lg w-full max-w-md">
         <h2 className="text-xl font-bold mb-4">Book {vehicle.name}</h2>
+        
+        {/* Vehicle Info Summary */}
+        <div className="bg-gray-50 p-4 rounded-lg mb-4">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="font-semibold">{vehicle.brand} {vehicle.model}</h3>
+            <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm">
+              {vehicle.type.toUpperCase()}
+            </span>
+          </div>
+          <div className="flex items-center justify-between text-sm text-gray-600">
+            <span>👥 {getCapacityText(vehicle.capacity, vehicle.type)}</span>
+            <span className="font-bold text-green-600">${vehicle.price_per_day}/day</span>
+          </div>
+        </div>
         
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
