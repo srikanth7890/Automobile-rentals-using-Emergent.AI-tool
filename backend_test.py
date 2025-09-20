@@ -44,16 +44,16 @@ def print_test_result(test_name, success, details=""):
     if not success:
         print()
 
-def test_auth_register():
-    """Test user registration for both admin and customer"""
-    print("\n🔐 Testing Authentication - Registration")
+def test_auth_setup():
+    """Setup authentication for testing - register or login existing users"""
+    print("\n🔐 Setting up Authentication")
     
-    # Test admin registration
+    # Try to register admin user first
     admin_data = {
-        "email": "sarah.admin@rentalcorp.com",
-        "name": "Sarah Johnson",
-        "phone": "+1-555-0123",
-        "password": "SecureAdmin2024!",
+        "email": "capacity.admin@rentaltest.com",
+        "name": "Capacity Test Admin",
+        "phone": "+1-555-9999",
+        "password": "CapacityAdmin2024!",
         "role": "admin"
     }
     
@@ -63,20 +63,35 @@ def test_auth_register():
             data = response.json()
             test_data['admin_token'] = data['token']
             test_data['admin_user'] = data['user']
-            print_test_result("Admin Registration", True, f"Admin user created: {data['user']['name']}")
+            print_test_result("Admin Registration", True, f"New admin user created: {data['user']['name']}")
+        elif response.status_code == 400 and "already registered" in response.text:
+            # User exists, try to login
+            admin_login = {
+                "email": "capacity.admin@rentaltest.com",
+                "password": "CapacityAdmin2024!"
+            }
+            login_response = requests.post(f"{BASE_URL}/auth/login", json=admin_login)
+            if login_response.status_code == 200:
+                data = login_response.json()
+                test_data['admin_token'] = data['token']
+                test_data['admin_user'] = data['user']
+                print_test_result("Admin Login", True, f"Existing admin logged in: {data['user']['name']}")
+            else:
+                print_test_result("Admin Authentication", False, f"Login failed: {login_response.status_code}, {login_response.text}")
+                return False
         else:
-            print_test_result("Admin Registration", False, f"Status: {response.status_code}, Response: {response.text}")
+            print_test_result("Admin Authentication", False, f"Registration failed: {response.status_code}, {response.text}")
             return False
     except Exception as e:
-        print_test_result("Admin Registration", False, f"Exception: {str(e)}")
+        print_test_result("Admin Authentication", False, f"Exception: {str(e)}")
         return False
     
-    # Test customer registration
+    # Try to register customer user
     customer_data = {
-        "email": "mike.customer@email.com",
-        "name": "Mike Rodriguez",
-        "phone": "+1-555-0456",
-        "password": "CustomerPass123!",
+        "email": "capacity.customer@rentaltest.com",
+        "name": "Capacity Test Customer",
+        "phone": "+1-555-8888",
+        "password": "CapacityCustomer2024!",
         "role": "customer"
     }
     
@@ -86,36 +101,27 @@ def test_auth_register():
             data = response.json()
             test_data['customer_token'] = data['token']
             test_data['customer_user'] = data['user']
-            print_test_result("Customer Registration", True, f"Customer user created: {data['user']['name']}")
+            print_test_result("Customer Registration", True, f"New customer user created: {data['user']['name']}")
+        elif response.status_code == 400 and "already registered" in response.text:
+            # User exists, try to login
+            customer_login = {
+                "email": "capacity.customer@rentaltest.com",
+                "password": "CapacityCustomer2024!"
+            }
+            login_response = requests.post(f"{BASE_URL}/auth/login", json=customer_login)
+            if login_response.status_code == 200:
+                data = login_response.json()
+                test_data['customer_token'] = data['token']
+                test_data['customer_user'] = data['user']
+                print_test_result("Customer Login", True, f"Existing customer logged in: {data['user']['name']}")
+            else:
+                print_test_result("Customer Authentication", False, f"Login failed: {login_response.status_code}, {login_response.text}")
+                return False
         else:
-            print_test_result("Customer Registration", False, f"Status: {response.status_code}, Response: {response.text}")
+            print_test_result("Customer Authentication", False, f"Registration failed: {response.status_code}, {response.text}")
             return False
     except Exception as e:
-        print_test_result("Customer Registration", False, f"Exception: {str(e)}")
-        return False
-    
-    return True
-
-def test_auth_login():
-    """Test user login for both roles"""
-    print("\n🔐 Testing Authentication - Login")
-    
-    # Test admin login
-    admin_login = {
-        "email": "sarah.admin@rentalcorp.com",
-        "password": "SecureAdmin2024!"
-    }
-    
-    try:
-        response = requests.post(f"{BASE_URL}/auth/login", json=admin_login)
-        if response.status_code == 200:
-            data = response.json()
-            print_test_result("Admin Login", True, f"Admin logged in: {data['user']['name']}")
-        else:
-            print_test_result("Admin Login", False, f"Status: {response.status_code}, Response: {response.text}")
-            return False
-    except Exception as e:
-        print_test_result("Admin Login", False, f"Exception: {str(e)}")
+        print_test_result("Customer Authentication", False, f"Exception: {str(e)}")
         return False
     
     return True
@@ -358,12 +364,6 @@ def test_vehicle_migration():
     """Test migration for existing vehicles without capacity field"""
     print("\n🚗 Testing Vehicle Migration for Capacity Field")
     
-    # First, let's create a vehicle using direct database insertion simulation
-    # by creating a vehicle and then testing if migration works on listing
-    
-    # Create a vehicle that might simulate old data (though our API will include capacity)
-    admin_headers = {"Authorization": f"Bearer {test_data['admin_token']}"}
-    
     # Test that when we list vehicles, migration logic applies default values
     try:
         response = requests.get(f"{BASE_URL}/vehicles")
@@ -471,8 +471,7 @@ def run_capacity_tests():
     test_results = []
     
     # Authentication Tests (required for other tests)
-    test_results.append(("Authentication Setup - Registration", test_auth_register()))
-    test_results.append(("Authentication Setup - Login", test_auth_login()))
+    test_results.append(("Authentication Setup", test_auth_setup()))
     
     # NEW CAPACITY FEATURE TESTS
     test_results.append(("Vehicle Capacity Creation", test_vehicle_capacity_creation()))
