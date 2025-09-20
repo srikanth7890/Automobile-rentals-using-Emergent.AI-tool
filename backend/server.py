@@ -95,6 +95,7 @@ class Vehicle(BaseModel):
     model: str
     year: int
     price_per_day: float
+    capacity: int
     image_url: Optional[str] = None
     description: str
     available: bool = True
@@ -107,6 +108,7 @@ class VehicleCreate(BaseModel):
     model: str
     year: int
     price_per_day: float
+    capacity: int
     description: str
 
 class Booking(BaseModel):
