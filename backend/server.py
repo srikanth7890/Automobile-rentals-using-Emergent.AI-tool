@@ -242,11 +242,43 @@ async def get_me(current_user: User = Depends(get_current_user)):
 @api_router.get("/vehicles", response_model=List[Vehicle])
 async def get_vehicles():
     vehicles = await db.vehicles.find({"available": True}).to_list(length=None)
+    # Handle migration for vehicles without capacity field
+    for vehicle in vehicles:
+        if 'capacity' not in vehicle:
+            # Set default capacity based on vehicle type
+            default_capacity = {
+                'motorcycle': 2,
+                'car': 5,
+                'truck': 3,
+                'van': 8
+            }.get(vehicle.get('type', 'car'), 5)
+            vehicle['capacity'] = default_capacity
+            # Update in database
+            await db.vehicles.update_one(
+                {"id": vehicle["id"]},
+                {"$set": {"capacity": default_capacity}}
+            )
     return [Vehicle(**vehicle) for vehicle in vehicles]
 
 @api_router.get("/vehicles/all", response_model=List[Vehicle])
 async def get_all_vehicles(current_user: User = Depends(get_admin_user)):
     vehicles = await db.vehicles.find().to_list(length=None)
+    # Handle migration for vehicles without capacity field
+    for vehicle in vehicles:
+        if 'capacity' not in vehicle:
+            # Set default capacity based on vehicle type
+            default_capacity = {
+                'motorcycle': 2,
+                'car': 5,
+                'truck': 3,
+                'van': 8
+            }.get(vehicle.get('type', 'car'), 5)
+            vehicle['capacity'] = default_capacity
+            # Update in database
+            await db.vehicles.update_one(
+                {"id": vehicle["id"]},
+                {"$set": {"capacity": default_capacity}}
+            )
     return [Vehicle(**vehicle) for vehicle in vehicles]
 
 @api_router.post("/vehicles", response_model=Vehicle)
